@@ -25,17 +25,17 @@
     "commit": "git add . && npx git-cz && git push",
     "prepublish": "npm run build"
   },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
   "dependencies": {
     "async": "^2.6.2",
     "chalk": "^2.4.2",
     "moment": "^2.21.0",
     "qs": "^6.5.1",
     "redis": "^2.8.0"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
   },
   "devDependencies": {
     "@semantic-release/changelog": "^3.0.0",

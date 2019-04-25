@@ -1,0 +1,17 @@
+.editorconfig
+.jshintrc
+.travis.yml
+.istanbul.yml
+.babelrc
+.idea/
+.vscode/
+test/
+coverage/
+coverage.lcov
+.coveralls.yml
+mocha.opts
+weback.config.js
+.github/
+.nyc_output
+node_modules/
+src/

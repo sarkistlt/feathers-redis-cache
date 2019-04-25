@@ -5,7 +5,7 @@
 - remove `redisCache` from config.
 - key always generated in before hook
 
-###Installation
+### Installation
 
 ```
   yarn add feathers-redis-cache
@@ -66,7 +66,7 @@ More details and example use bellow
 * `hooks.after(options)` - cache the data to redis
 * `hooks.purge()` - purge cache from redis
 
-####options properties (all props are optional)
+#### options properties (all props are optional)
 
 ##### cacheKey(context: `feathers-context`): `string`
 In case if you want to use custom function to modify key name, you need to pass the same function in before and after hooks.
@@ -157,7 +157,7 @@ module.exports = {
 
 You can also skip cahce hook by passing `hook.params.$skipCacheHook = true`
 
-###TODO:
+## TODO:
 - TS definitions
 - test cases
 - option in after hook to set limit of keys per group

@@ -37,7 +37,7 @@ exports.default = (function (options) {
             });
         }
         catch (err) {
-            errorLogger.error(err);
+            errorLogger(err);
             app.set('redisClient', undefined);
         }
         return this;

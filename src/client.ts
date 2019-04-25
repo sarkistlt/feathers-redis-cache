@@ -31,7 +31,7 @@ export default (options: any = {}) => {
         console.log(`${chalk.green('[redis]')} connected`);
       });
     } catch (err) {
-      errorLogger.error(err);
+      errorLogger(err);
       app.set('redisClient', undefined);
     }
 

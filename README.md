@@ -77,7 +77,6 @@ Time in seconds when to expire the key, this option need to be passed in after h
 ##### env: `string`
 The default environment is production, but it is annoying when running test as the hooks output information to the console. Therefore if you use this option, you can set `test` as an environment and the hooks will not output anything to the console. This is useful for CI or CLI.
 
-
 Available routes:
 ```js
 '/cache/clear/all' // clears the whole cache
@@ -155,6 +154,8 @@ module.exports = {
   }
 };
 ```
+
+You can also skip cahce hook by passing `hook.params.$skipCacheHook = true`
 
 ###TODO:
 - TS definitions

@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import qs from 'qs';
 import async from 'async';
 
+const { DISABLE_REDIS_CACHE } = process.env;
 const HTTP_OK = 200;
 const HTTP_NO_CONTENT = 204;
 const HTTP_SERVER_ERROR = 500;
@@ -29,6 +30,10 @@ function cacheKey(hook) {
 
 export default {
   before(passedOptions) {
+    if (DISABLE_REDIS_CACHE) {
+      return hook => hook;
+    }
+
     return function (hook) {
       try {
         if (hook && hook.params && hook.params.$skipCacheHook) {
@@ -84,6 +89,10 @@ export default {
     };
   },
   after(passedOptions) {
+    if (DISABLE_REDIS_CACHE) {
+      return hook => hook;
+    }
+
     return function (hook) {
       try {
         if (
@@ -131,6 +140,10 @@ export default {
     };
   },
   purge() {
+    if (DISABLE_REDIS_CACHE) {
+      return hook => hook;
+    }
+
     return function (hook) {
       try {
         if (

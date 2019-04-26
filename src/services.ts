@@ -1,5 +1,6 @@
 import async from 'async';
 
+const { DISABLE_REDIS_CACHE } = process.env;
 const HTTP_OK = 200;
 const HTTP_NO_CONTENT = 204;
 const HTTP_SERVER_ERROR = 500;
@@ -157,9 +158,11 @@ export default (options: any = {}) => {
   return function () {
     const app = this;
 
-    app.use(`${pathPrefix}/clear/single`, serviceClearSingle);
-    app.use(`${pathPrefix}/clear/group`, serviceClearGroup);
-    app.use(`${pathPrefix}/clear/all`, serviceClearAll);
+    if (!DISABLE_REDIS_CACHE) {
+      app.use(`${pathPrefix}/clear/single`, serviceClearSingle);
+      app.use(`${pathPrefix}/clear/group`, serviceClearGroup);
+      app.use(`${pathPrefix}/clear/all`, serviceClearAll);
+    }
   };
 }
 

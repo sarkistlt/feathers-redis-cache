@@ -2,9 +2,15 @@
 import redis from 'redis';
 import chalk from 'chalk';
 
+const { DISABLE_REDIS_CACHE } = process.env;
+
 export default (options: any = {}) => {
   const errorLogger = options.errorLogger || console.error;
   const retryInterval = options.retryInterval || 5000;
+
+  if (DISABLE_REDIS_CACHE) {
+    return () => {};
+  }
 
   return function client() {
     const app = this;

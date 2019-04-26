@@ -155,7 +155,8 @@ module.exports = {
 };
 ```
 
-You can also skip cahce hook by passing `hook.params.$skipCacheHook = true`
+You can also skip cache hook by passing `hook.params.$skipCacheHook = true`
+You can also disable redis-cache hooks and service by passing env. variable `DISABLE_REDIS_CACHE=true`
 
 ## TODO:
 - TS definitions

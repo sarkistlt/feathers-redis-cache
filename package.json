@@ -1,7 +1,7 @@
 {
   "name": "feathers-redis-cache",
   "description": "Redis cache for feathers service",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "homepage": "git://github.com/sarkistlt/feathers-redis-cache",
   "main": "build/index.js",
   "keywords": [

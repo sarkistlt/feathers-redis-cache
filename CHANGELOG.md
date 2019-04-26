@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/sarkistlt/feathers-redis-cache/compare/v1.0.2...v1.0.3) (2019-04-26)
+
+
+### Bug Fixes
+
+* **implement disable mech.:** disable hooks and services by passing DISABLE_REDIS_CACHE ([9830514](https://github.com/sarkistlt/feathers-redis-cache/commit/9830514))
+
 ## [1.0.2](https://github.com/sarkistlt/feathers-redis-cache/compare/v1.0.1...v1.0.2) (2019-04-25)
 
 

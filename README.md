@@ -1,7 +1,7 @@
 ##### This repository is a fork of [feathers-hooks-rediscache](https://github.com/idealley/feathers-hooks-rediscache), with the following changes:
 - refactor and simplified API and source code (details bellow).
 - support of feathers pagination hook, when it's enabled or disabled per the same endpoint.
-- remove `hookCache` now to set custom expiration date you need to pass it as an option in before hook.
+- remove `hookCache` now to set custom expiration date you need to pass it as an option in after hook.
 - remove `redisCache` from config.
 - key always generated in before hook
 

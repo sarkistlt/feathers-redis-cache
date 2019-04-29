@@ -39,6 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var async_1 = __importDefault(require("async"));
+var DISABLE_REDIS_CACHE = process.env.DISABLE_REDIS_CACHE;
 var HTTP_OK = 200;
 var HTTP_NO_CONTENT = 204;
 var HTTP_SERVER_ERROR = 500;
@@ -195,9 +196,11 @@ exports.default = (function (options) {
     var pathPrefix = options.pathPrefix || '/cache';
     return function () {
         var app = this;
-        app.use(pathPrefix + "/clear/single", serviceClearSingle);
-        app.use(pathPrefix + "/clear/group", serviceClearGroup);
-        app.use(pathPrefix + "/clear/all", serviceClearAll);
+        if (!DISABLE_REDIS_CACHE) {
+            app.use(pathPrefix + "/clear/single", serviceClearSingle);
+            app.use(pathPrefix + "/clear/group", serviceClearGroup);
+            app.use(pathPrefix + "/clear/all", serviceClearAll);
+        }
     };
 });
 //# sourceMappingURL=services.js.map

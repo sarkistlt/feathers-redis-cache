@@ -53,6 +53,7 @@ var moment_1 = __importDefault(require("moment/moment"));
 var chalk_1 = __importDefault(require("chalk"));
 var qs_1 = __importDefault(require("qs"));
 var async_1 = __importDefault(require("async"));
+var DISABLE_REDIS_CACHE = process.env.DISABLE_REDIS_CACHE;
 var HTTP_OK = 200;
 var HTTP_NO_CONTENT = 204;
 var HTTP_SERVER_ERROR = 500;
@@ -73,6 +74,9 @@ function cacheKey(hook) {
 }
 exports.default = {
     before: function (passedOptions) {
+        if (DISABLE_REDIS_CACHE) {
+            return function (hook) { return hook; };
+        }
         return function (hook) {
             try {
                 if (hook && hook.params && hook.params.$skipCacheHook) {
@@ -117,6 +121,9 @@ exports.default = {
         };
     },
     after: function (passedOptions) {
+        if (DISABLE_REDIS_CACHE) {
+            return function (hook) { return hook; };
+        }
         return function (hook) {
             try {
                 if (hook
@@ -157,6 +164,9 @@ exports.default = {
         };
     },
     purge: function () {
+        if (DISABLE_REDIS_CACHE) {
+            return function (hook) { return hook; };
+        }
         return function (hook) {
             var _this = this;
             try {

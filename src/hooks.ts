@@ -22,7 +22,7 @@ function cacheKey(hook) {
   }
 
   if (Object.keys(q).length > 0) {
-    path += `?${qs.stringify(q, { encode: false })}`;
+    path += `?${qs.stringify(q, { encode: false, arrayFormat: 'comma' })}`;
   }
 
   return path;

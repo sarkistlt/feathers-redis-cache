@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/sarkistlt/feathers-redis-cache/compare/v1.0.3...v1.0.4) (2019-04-29)
+
+
+### Bug Fixes
+
+* **cacheKey:** change format of parsed url ([3fb779a](https://github.com/sarkistlt/feathers-redis-cache/commit/3fb779a))
+
 ## [1.0.3](https://github.com/sarkistlt/feathers-redis-cache/compare/v1.0.2...v1.0.3) (2019-04-26)
 
 

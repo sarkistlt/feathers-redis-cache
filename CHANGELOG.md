@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/sarkistlt/feathers-redis-cache/compare/v1.0.4...v1.0.5) (2019-04-29)
+
+
+### Bug Fixes
+
+* **cacheKey:** add qs option arrayFormat: 'comma' ([5969d21](https://github.com/sarkistlt/feathers-redis-cache/commit/5969d21))
+
 ## [1.0.4](https://github.com/sarkistlt/feathers-redis-cache/compare/v1.0.3...v1.0.4) (2019-04-29)
 
 

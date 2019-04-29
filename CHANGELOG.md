@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/sarkistlt/feathers-redis-cache/compare/v1.0.5...v1.0.6) (2019-04-29)
+
+
+### Bug Fixes
+
+* **ObjectID:** parse objectID if it was passed as an query ([921b188](https://github.com/sarkistlt/feathers-redis-cache/commit/921b188))
+
 ## [1.0.5](https://github.com/sarkistlt/feathers-redis-cache/compare/v1.0.4...v1.0.5) (2019-04-29)
 
 

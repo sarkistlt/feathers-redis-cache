@@ -4,9 +4,14 @@
 ##### This repository is a fork of [feathers-hooks-rediscache](https://github.com/idealley/feathers-hooks-rediscache), with the following changes:
 - refactor and simplified API and source code (details bellow).
 - support of feathers pagination hook, when it's enabled or disabled per the same endpoint.
+- key always generated in before hook.
+- option to pass custom logger function to log errors.
+- option to pass custom `/cache` prefix for redis routs.
+- option to pass custom `cacheKey(hook)` function in before hook, to customize key generation.
+- implementing `.purge()` hook, so you can place in after create/patch/update/remove hooks to purge entire group and avoid having keys with corrupted values in the cache.
 - remove `hookCache` now to set custom expiration date you need to pass it as an option in after hook.
 - remove `redisCache` from config.
-- key always generated in before hook
+- remove `parseNestedRoutes`, `removePathFromCacheKey`, `defaultDuration` (by default it will expire in 24hr), `immediateCacheKey` options.
 
 ### Installation
 

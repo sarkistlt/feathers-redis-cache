@@ -89,7 +89,7 @@ Available routes:
 
 ## Complete Example
 
-Here's an example of a Feathers server that uses `feathers-hooks-rediscache`.
+Here's an example of a Feathers server that uses `feathers-redis-cache`.
 
 ```js
 const feathers = require('feathers');

@@ -6,8 +6,11 @@
   "main": "build/index.js",
   "keywords": [
     "feathers",
+    "feathersjs",
     "feathers-hooks",
     "redis",
+    "feathers-cache",
+    "feathers-redis-cache",
     "cache"
   ],
   "license": "MIT",

@@ -1,3 +1,10 @@
+## [1.0.8](https://github.com/sarkistlt/feathers-redis-cache/compare/v1.0.7...v1.0.8) (2019-05-03)
+
+
+### Bug Fixes
+
+* **gitignore:** typo fix ([6018510](https://github.com/sarkistlt/feathers-redis-cache/commit/6018510))
+
 ## [1.0.7](https://github.com/sarkistlt/feathers-redis-cache/compare/v1.0.6...v1.0.7) (2019-05-03)
 
 

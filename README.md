@@ -94,7 +94,7 @@ const rest = require('feathers-rest');
 const hooks = require('feathers-hooks');
 const bodyParser = require('body-parser');
 const errorHandler = require('feathers-errors/handler');
-const redisHook = require('feathers-hooks-rediscache');
+const redisCache = require('feathers-redis-cache');
 
 // Initialize the application
 const app = feathers()
@@ -104,10 +104,10 @@ const app = feathers()
   .configure(hooks())
   // errorLogger is function for logging errors
   // if not passed console.error will bbe used
-  .configure(redisHook.client({ errorLogger: logger.error }))
+  .configure(redisCache.client({ errorLogger: logger.error }))
   // you can change cache path prefix by passing `pathPrefix` option
   // if not passed default prefix '/cache' will be used
-  .configure(redisHook.services({ pathPrefix: '/cache' }))
+  .configure(redisCache.services({ pathPrefix: '/cache' }))
   .use(errorHandler());
 
 app.listen(3030);
@@ -119,14 +119,14 @@ Add hooks on the routes that need caching
 ```js
 //services/<service>.hooks.js
 
-const hooks = require('feathers-hooks-rediscache');
+const redisCache = require('feathers-redis-cache');
 
 
 module.exports = {
   before: {
     all: [],
-    find: [hooks.before()],
-    get: [hooks.before()],
+    find: [redisCache.before()],
+    get: [redisCache.before()],
     create: [],
     update: [],
     patch: [],
@@ -135,12 +135,12 @@ module.exports = {
 
   after: {
     all: [],
-    find: [hooks.after({ expiration: 3600 * 24 * 7 })],
-    get: [hooks.after({ expiration: 3600 * 24 * 7 })],
-    create: [hooks.purge()],
-    update: [hooks.purge()],
-    patch: [hooks.purge()],
-    remove: [hooks.purge()]
+    find: [redisCache.after({ expiration: 3600 * 24 * 7 })],
+    get: [redisCache.after({ expiration: 3600 * 24 * 7 })],
+    create: [redisCache.purge()],
+    update: [redisCache.purge()],
+    patch: [redisCache.purge()],
+    remove: [redisCache.purge()]
   },
 
   error: {

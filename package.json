@@ -22,7 +22,7 @@
   "scripts": {
     "build": "rm -rf ./lib && NODE_ENV=production tsc",
     "release": "npx semantic-release",
-    "commit": "git add . && npx git-cz && git push",
+    "commit": "npm run build && git add . && npx git-cz && git push",
     "prepublish": "npm run build"
   },
   "config": {

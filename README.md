@@ -1,3 +1,6 @@
+[![License](https://img.shields.io/npm/l/feathers-hooks-rediscache.svg)](https://www.npmjs.com/package/graphql-auto-generating-cms)
+[![NPM](https://img.shields.io/npm/v/feathers-hooks-rediscache.svg)](https://www.npmjs.com/package/graphql-auto-generating-cms)
+
 ##### This repository is a fork of [feathers-hooks-rediscache](https://github.com/idealley/feathers-hooks-rediscache), with the following changes:
 - refactor and simplified API and source code (details bellow).
 - support of feathers pagination hook, when it's enabled or disabled per the same endpoint.

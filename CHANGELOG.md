@@ -1,3 +1,10 @@
+## [1.0.9](https://github.com/sarkistlt/feathers-redis-cache/compare/v1.0.8...v1.0.9) (2019-05-03)
+
+
+### Bug Fixes
+
+* **readme:** add labels ([ad93576](https://github.com/sarkistlt/feathers-redis-cache/commit/ad93576))
+
 ## [1.0.8](https://github.com/sarkistlt/feathers-redis-cache/compare/v1.0.7...v1.0.8) (2019-05-03)
 
 

@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import qs from 'qs';
 import async from 'async';
 
-const { DISABLE_REDIS_CACHE } = process.env;
+const { DISABLE_REDIS_CACHE, ENABLE_REDIS_CACHE_LOGGER } = process.env;
 const HTTP_OK = 200;
 const HTTP_NO_CONTENT = 204;
 const HTTP_SERVER_ERROR = 500;
@@ -71,7 +71,7 @@ export default {
               hook.result = data.cache;
               hook.params.$skipCacheHook = true;
 
-              if (options.env !== 'test') {
+              if (options.env !== 'test' && ENABLE_REDIS_CACHE_LOGGER === 'true') {
                 console.log(`${chalk.cyan('[redis]')} returning cached value for ${chalk.green(path)}.`);
                 console.log(`> Expires on ${duration}.`);
               }
@@ -126,7 +126,7 @@ export default {
           client.expire(path, duration);
           client.rpush(group, path);
 
-          if (options.env !== 'test') {
+          if (options.env !== 'test' && ENABLE_REDIS_CACHE_LOGGER === 'true') {
             console.log(`${chalk.cyan('[redis]')} added ${chalk.green(path)} to the cache.`);
             console.log(`> Expires in ${moment.duration(duration, 'seconds').humanize()}.`);
           }

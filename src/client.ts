@@ -2,7 +2,7 @@
 import redis from 'redis';
 import chalk from 'chalk';
 
-const { DISABLE_REDIS_CACHE } = process.env;
+const { DISABLE_REDIS_CACHE, ENABLE_REDIS_CACHE_LOGGER } = process.env;
 
 export default (options: any = {}) => {
   const errorLogger = options.errorLogger || console.error;
@@ -22,7 +22,9 @@ export default (options: any = {}) => {
         retry_strategy: () => {
           app.set('redisClient', undefined);
 
-          console.log(`${chalk.yellow('[redis]')} not connected`);
+          if (ENABLE_REDIS_CACHE_LOGGER === 'true') {
+            console.log(`${chalk.yellow('[redis]')} not connected`);
+          }
 
           return retryInterval;
         }
@@ -34,7 +36,9 @@ export default (options: any = {}) => {
       client.on('ready', () => {
         app.set('redisClient', client);
 
-        console.log(`${chalk.green('[redis]')} connected`);
+        if (ENABLE_REDIS_CACHE_LOGGER === 'true') {
+          console.log(`${chalk.green('[redis]')} connected`);
+        }
       });
     } catch (err) {
       errorLogger(err);

@@ -53,7 +53,7 @@ var moment_1 = __importDefault(require("moment/moment"));
 var chalk_1 = __importDefault(require("chalk"));
 var qs_1 = __importDefault(require("qs"));
 var async_1 = __importDefault(require("async"));
-var DISABLE_REDIS_CACHE = process.env.DISABLE_REDIS_CACHE;
+var _a = process.env, DISABLE_REDIS_CACHE = _a.DISABLE_REDIS_CACHE, ENABLE_REDIS_CACHE_LOGGER = _a.ENABLE_REDIS_CACHE_LOGGER;
 var HTTP_OK = 200;
 var HTTP_NO_CONTENT = 204;
 var HTTP_SERVER_ERROR = 500;
@@ -104,7 +104,7 @@ exports.default = {
                             var duration = moment_1.default(data.expiresOn).format('DD MMMM YYYY - HH:mm:ss');
                             hook.result = data.cache;
                             hook.params.$skipCacheHook = true;
-                            if (options.env !== 'test') {
+                            if (options.env !== 'test' && ENABLE_REDIS_CACHE_LOGGER === 'true') {
                                 console.log(chalk_1.default.cyan('[redis]') + " returning cached value for " + chalk_1.default.green(path) + ".");
                                 console.log("> Expires on " + duration + ".");
                             }
@@ -150,7 +150,7 @@ exports.default = {
                     }));
                     client.expire(path, duration);
                     client.rpush(group, path);
-                    if (options.env !== 'test') {
+                    if (options.env !== 'test' && ENABLE_REDIS_CACHE_LOGGER === 'true') {
                         console.log(chalk_1.default.cyan('[redis]') + " added " + chalk_1.default.green(path) + " to the cache.");
                         console.log("> Expires in " + moment_1.default.duration(duration, 'seconds').humanize() + ".");
                     }

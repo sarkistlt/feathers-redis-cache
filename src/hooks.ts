@@ -9,9 +9,10 @@ const HTTP_OK = 200;
 const HTTP_NO_CONTENT = 204;
 const HTTP_SERVER_ERROR = 500;
 const defaults = {
-  defaultExpiration: 3600 * 24
+  defaultExpiration: 3600 * 24 // seconds
 };
 
+// TODO use md5 for path + query param
 function cacheKey(hook) {
   const q = hook.params.query || {};
   const p = hook.params.paginate === false ? 'disabled' : 'enabled';
@@ -22,7 +23,7 @@ function cacheKey(hook) {
   }
 
   if (Object.keys(q).length > 0) {
-    path += `?${qs.stringify(JSON.parse(JSON.stringify(q)), { encode: false, arrayFormat: 'comma' })}`;
+    path += `?${qs.stringify(JSON.parse(JSON.stringify(q)), { encode: false })}`;
   }
 
   return path;

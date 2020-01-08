@@ -68,7 +68,7 @@ function cacheKey(hook) {
         path += "/" + hook.id;
     }
     if (Object.keys(q).length > 0) {
-        path += "?" + qs_1.default.stringify(JSON.parse(JSON.stringify(q)), { encode: false, arrayFormat: 'comma' });
+        path += "?" + qs_1.default.stringify(JSON.parse(JSON.stringify(q)), { encode: false });
     }
     return path;
 }

@@ -81,43 +81,42 @@ function cacheKey(hook) {
 function purgeGroup(client, group, prefix) {
     if (prefix === void 0) { prefix = 'frc_'; }
     return __awaiter(this, void 0, void 0, function () {
-        function scan() {
-            return new Promise(function (resolve, reject) {
-                client.scan(cursor, 'MATCH', "" + prefix + group + "*", 'COUNT', '1000', function (err, reply) {
-                    if (err)
-                        return reject(err);
-                    if (!Array.isArray(reply[1]) || !reply[1][0])
-                        return resolve();
-                    cursor = reply[0];
-                    var keys = reply[1];
-                    var batchKeys = keys.reduce(function (a, c) {
-                        if (Array.isArray(a[a.length - 1]) && a[a.length - 1].length < 100) {
-                            a[a.length - 1].push(c.replace(prefix, ''));
-                        }
-                        else if (!Array.isArray(a[a.length - 1]) || a[a.length - 1].length >= 100) {
-                            a.push([c.replace(prefix, '')]);
-                        }
-                        return a;
-                    }, []);
-                    async_1.default.eachOfLimit(batchKeys, 10, function (batch, idx, cb) {
-                        if (client.unlink) {
-                            client.unlink(batch, cb);
-                        }
-                        else {
-                            client.del(batch, cb);
-                        }
-                    }, function (err) {
-                        if (err)
-                            return reject(err);
-                        return scan();
-                    });
-                });
-            });
-        }
-        var cursor;
         return __generator(this, function (_a) {
-            cursor = '0';
-            return [2, scan()];
+            return [2, new Promise(function (resolve, reject) {
+                    var cursor = '0';
+                    function scan() {
+                        client.scan(cursor, 'MATCH', "" + prefix + group + "*", 'COUNT', '1000', function (err, reply) {
+                            if (err)
+                                return reject(err);
+                            if (!Array.isArray(reply[1]) || !reply[1][0])
+                                return resolve();
+                            cursor = reply[0];
+                            var keys = reply[1];
+                            var batchKeys = keys.reduce(function (a, c) {
+                                if (Array.isArray(a[a.length - 1]) && a[a.length - 1].length < 100) {
+                                    a[a.length - 1].push(c.replace(prefix, ''));
+                                }
+                                else if (!Array.isArray(a[a.length - 1]) || a[a.length - 1].length >= 100) {
+                                    a.push([c.replace(prefix, '')]);
+                                }
+                                return a;
+                            }, []);
+                            async_1.default.eachOfLimit(batchKeys, 10, function (batch, idx, cb) {
+                                if (client.unlink) {
+                                    client.unlink(batch, cb);
+                                }
+                                else {
+                                    client.del(batch, cb);
+                                }
+                            }, function (err) {
+                                if (err)
+                                    return reject(err);
+                                return scan();
+                            });
+                        });
+                    }
+                    return scan();
+                })];
         });
     });
 }

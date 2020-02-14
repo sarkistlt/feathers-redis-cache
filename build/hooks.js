@@ -85,17 +85,17 @@ function purgeGroup(client, group, prefix) {
             return new Promise(function (resolve, reject) {
                 client.scan(cursor, 'MATCH', "" + prefix + group + "*", 'COUNT', '1000', function (err, reply) {
                     if (err)
-                        reject(err);
-                    if (!Array.isArray(!reply[1]) || !reply[1][0])
+                        return reject(err);
+                    if (!Array.isArray(reply[1]) || !reply[1][0])
                         return resolve();
                     cursor = reply[0];
                     var keys = reply[1];
                     var batchKeys = keys.reduce(function (a, c) {
-                        if (Array.isArray(a[a.length - 1]) && a[a.length - 1].length < 2) {
-                            a[a.length - 1].push(c);
+                        if (Array.isArray(a[a.length - 1]) && a[a.length - 1].length < 100) {
+                            a[a.length - 1].push(c.replace(prefix, ''));
                         }
-                        else if (!Array.isArray(a[a.length - 1]) || a[a.length - 1].length >= 2) {
-                            a.push([c]);
+                        else if (!Array.isArray(a[a.length - 1]) || a[a.length - 1].length >= 100) {
+                            a.push([c.replace(prefix, '')]);
                         }
                         return a;
                     }, []);
@@ -106,9 +106,12 @@ function purgeGroup(client, group, prefix) {
                         else {
                             client.del(batch, cb);
                         }
-                    }, function (err) { return err ? reject(err) : resolve(); });
+                    }, function (err) {
+                        if (err)
+                            return reject(err);
+                        return scan();
+                    });
                 });
-                return scan();
             });
         }
         var cursor;

@@ -145,7 +145,15 @@ var serviceClearAll = {
                             status: HTTP_SERVER_ERROR
                         }];
                 }
-                return [2, hooks_1.purgeGroup(client, '', prefix)];
+                return [2, hooks_1.purgeGroup(client, '', prefix)
+                        .then(function () { return ({
+                        message: 'cache cleared',
+                        status: HTTP_OK,
+                    }); })
+                        .catch(function (err) { return ({
+                        message: err.message,
+                        status: HTTP_SERVER_ERROR,
+                    }); })];
             });
         });
     },

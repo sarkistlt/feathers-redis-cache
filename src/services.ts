@@ -1,4 +1,3 @@
-import async from 'async';
 import { purgeGroup } from './hooks';
 
 const { DISABLE_REDIS_CACHE } = process.env;
@@ -109,7 +108,15 @@ const serviceClearAll = {
       };
     }
 
-    return purgeGroup(client, '', prefix);
+    return purgeGroup(client, '', prefix)
+      .then(() => ({
+        message: 'cache cleared',
+        status: HTTP_OK,
+      }))
+      .catch((err) => ({
+        message: err.message,
+        status: HTTP_SERVER_ERROR,
+      }));
   },
 };
 const serviceFlashDb = {

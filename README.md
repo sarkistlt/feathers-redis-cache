@@ -47,7 +47,8 @@ You can also purge single cached paths as by doing GET requests on
 '/cache/clear/single/articles/article?markdown=true' // works with query strings too
 ```
 
-or purge all by calling `/cache/clear/all`
+- purge all keys by calling `/cache/clear/all`
+- flash entire redis db `/cache/flashdb`
 
 It was meant to be used over **_HTTP_**, not yet tested with sockets.
 

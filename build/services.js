@@ -34,11 +34,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var async_1 = __importDefault(require("async"));
+var hooks_1 = require("./hooks");
 var DISABLE_REDIS_CACHE = process.env.DISABLE_REDIS_CACHE;
 var HTTP_OK = 200;
 var HTTP_NO_CONTENT = 204;
@@ -68,6 +65,7 @@ var serviceClearSingle = {
                         }];
                 }
                 return [2, new Promise(function (resolve) {
+                        var del = client.unlink || client.del;
                         client.get(target, function (err, reply) {
                             if (err) {
                                 return resolve({ message: 'something went wrong' + err.message });
@@ -78,7 +76,7 @@ var serviceClearSingle = {
                                     status: HTTP_NO_CONTENT
                                 });
                             }
-                            client.del(target, function (err, reply) {
+                            del(target, function (err, reply) {
                                 if (err) {
                                     return resolve({ message: 'something went wrong' + err.message });
                                 }
@@ -106,10 +104,10 @@ var serviceClearGroup = {
     },
     find: function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var client, target;
-            var _this = this;
+            var client, prefix, target;
             return __generator(this, function (_a) {
                 client = this.app.get('redisClient');
+                prefix = this.app.get('redis').prefix;
                 target = params.query.target;
                 if (!client) {
                     return [2, {
@@ -117,53 +115,42 @@ var serviceClearGroup = {
                             status: HTTP_SERVER_ERROR
                         }];
                 }
-                return [2, new Promise(function (resolve) {
-                        client.lrange("group-" + target, 0, -1, function (err, reply) {
-                            if (err) {
-                                return resolve({ message: 'something went wrong' + err.message });
-                            }
-                            if (!reply || !Array.isArray(reply) || reply.length <= 0) {
-                                return resolve({
-                                    message: "cache already cleared for the group key: " + target,
-                                    status: HTTP_NO_CONTENT
-                                });
-                            }
-                            async_1.default.eachOfLimit(reply, 10, async_1.default.asyncify(function (key) { return __awaiter(_this, void 0, void 0, function () {
-                                return __generator(this, function (_a) {
-                                    return [2, new Promise(function (res) {
-                                            client.del(key, function (err, reply) {
-                                                if (err) {
-                                                    return res({ message: 'something went wrong' + err.message });
-                                                }
-                                                if (!reply) {
-                                                    return res({
-                                                        message: "cache already cleared for key " + target,
-                                                        status: HTTP_NO_CONTENT
-                                                    });
-                                                }
-                                                res({
-                                                    message: "cache cleared for key " + target,
-                                                    status: HTTP_OK
-                                                });
-                                            });
-                                        })];
-                                });
-                            }); }), function (err) {
-                                if (err) {
-                                    return resolve({ message: 'something went wrong' + err.message });
-                                }
-                                resolve({
-                                    message: "cache cleared for the group key: " + target,
-                                    status: HTTP_OK
-                                });
-                            });
-                        });
-                    })];
+                return [2, hooks_1.purgeGroup(client, target, prefix)
+                        .then(function () { return ({
+                        message: "cache cleared for group " + target,
+                        status: HTTP_OK,
+                    }); })
+                        .catch(function (err) { return ({
+                        message: err.message,
+                        status: HTTP_SERVER_ERROR,
+                    }); })];
             });
         });
     },
 };
 var serviceClearAll = {
+    setup: function (app, path) {
+        this.app = app;
+        this.path = path;
+    },
+    find: function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var client, prefix;
+            return __generator(this, function (_a) {
+                client = this.app.get('redisClient');
+                prefix = this.app.get('redis').prefix;
+                if (!client) {
+                    return [2, {
+                            message: 'Redis unavailable',
+                            status: HTTP_SERVER_ERROR
+                        }];
+                }
+                return [2, hooks_1.purgeGroup(client, '', prefix)];
+            });
+        });
+    },
+};
+var serviceFlashDb = {
     setup: function (app, path) {
         this.app = app;
         this.path = path;
@@ -200,6 +187,7 @@ exports.default = (function (options) {
             app.use(pathPrefix + "/clear/single", serviceClearSingle);
             app.use(pathPrefix + "/clear/group", serviceClearGroup);
             app.use(pathPrefix + "/clear/all", serviceClearAll);
+            app.use(pathPrefix + "/flashdb", serviceFlashDb);
         }
     };
 });

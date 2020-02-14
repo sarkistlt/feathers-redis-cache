@@ -55,11 +55,17 @@ var qs_1 = __importDefault(require("qs"));
 var async_1 = __importDefault(require("async"));
 var _a = process.env, DISABLE_REDIS_CACHE = _a.DISABLE_REDIS_CACHE, ENABLE_REDIS_CACHE_LOGGER = _a.ENABLE_REDIS_CACHE_LOGGER;
 var HTTP_OK = 200;
-var HTTP_NO_CONTENT = 204;
 var HTTP_SERVER_ERROR = 500;
 var defaults = {
-    defaultExpiration: 3600 * 24
+    defaultExpiration: 3600 * 24,
 };
+function hashCode(s) {
+    var h;
+    for (var i = 0; i < s.length; i++) {
+        h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+    }
+    return String(h);
+}
 function cacheKey(hook) {
     var q = hook.params.query || {};
     var p = hook.params.paginate === false ? 'disabled' : 'enabled';
@@ -70,8 +76,49 @@ function cacheKey(hook) {
     if (Object.keys(q).length > 0) {
         path += "?" + qs_1.default.stringify(JSON.parse(JSON.stringify(q)), { encode: false });
     }
-    return path;
+    return "" + hashCode(hook.path) + hashCode(path);
 }
+function purgeGroup(client, group, prefix) {
+    if (prefix === void 0) { prefix = 'frc_'; }
+    return __awaiter(this, void 0, void 0, function () {
+        function scan() {
+            return new Promise(function (resolve, reject) {
+                client.scan(cursor, 'MATCH', "" + prefix + group + "*", 'COUNT', '1000', function (err, reply) {
+                    if (err)
+                        reject(err);
+                    if (!Array.isArray(!reply[1]) || !reply[1][0])
+                        return resolve();
+                    cursor = reply[0];
+                    var keys = reply[1];
+                    var batchKeys = keys.reduce(function (a, c) {
+                        if (Array.isArray(a[a.length - 1]) && a[a.length - 1].length < 2) {
+                            a[a.length - 1].push(c);
+                        }
+                        else if (!Array.isArray(a[a.length - 1]) || a[a.length - 1].length >= 2) {
+                            a.push([c]);
+                        }
+                        return a;
+                    }, []);
+                    async_1.default.eachOfLimit(batchKeys, 10, function (batch, idx, cb) {
+                        if (client.unlink) {
+                            client.unlink(batch, cb);
+                        }
+                        else {
+                            client.del(batch, cb);
+                        }
+                    }, function (err) { return err ? reject(err) : resolve(); });
+                });
+                return scan();
+            });
+        }
+        var cursor;
+        return __generator(this, function (_a) {
+            cursor = '0';
+            return [2, scan()];
+        });
+    });
+}
+exports.purgeGroup = purgeGroup;
 exports.default = {
     before: function (passedOptions) {
         if (DISABLE_REDIS_CACHE) {
@@ -138,20 +185,20 @@ exports.default = {
                     var client = hook.app.get('redisClient');
                     var options = __assign({}, defaults, passedOptions);
                     var duration = options.expiration || options.defaultExpiration;
-                    var path = hook.params.cacheKey;
-                    var group = hook.path ? "group-" + hook.path : '';
+                    var cacheKey = hook.params.cacheKey;
+                    var group = hook.path ? hashCode("group-" + hook.path) : '';
                     if (!client) {
                         return resolve(hook);
                     }
-                    client.set(path, JSON.stringify({
+                    client.set(cacheKey, JSON.stringify({
                         cache: hook.result,
                         expiresOn: moment_1.default().add(moment_1.default.duration(duration, 'seconds')),
                         group: group,
                     }));
-                    client.expire(path, duration);
-                    client.rpush(group, path);
+                    client.expire(cacheKey, duration);
+                    client.rpush(group, cacheKey);
                     if (options.env !== 'test' && ENABLE_REDIS_CACHE_LOGGER === 'true') {
-                        console.log(chalk_1.default.cyan('[redis]') + " added " + chalk_1.default.green(path) + " to the cache.");
+                        console.log(chalk_1.default.cyan('[redis]') + " added " + chalk_1.default.green(cacheKey) + " to the cache.");
                         console.log("> Expires in " + moment_1.default.duration(duration, 'seconds').humanize() + ".");
                     }
                     resolve(hook);
@@ -168,7 +215,6 @@ exports.default = {
             return function (hook) { return hook; };
         }
         return function (hook) {
-            var _this = this;
             try {
                 if (hook
                     && hook.params
@@ -177,42 +223,23 @@ exports.default = {
                 }
                 return new Promise(function (resolve) {
                     var client = hook.app.get('redisClient');
-                    var target = hook.path;
+                    var prefix = hook.app.get('redis').prefix;
+                    var targetGroup = hook.path;
                     if (!client) {
                         return {
                             message: 'Redis unavailable',
-                            status: HTTP_SERVER_ERROR
+                            status: HTTP_SERVER_ERROR,
                         };
                     }
-                    client.lrange("group-" + target, 0, -1, function (err, reply) {
-                        if (err) {
-                            return resolve(hook);
-                        }
-                        if (!reply || !Array.isArray(reply) || reply.length <= 0) {
-                            return resolve(hook);
-                        }
-                        async_1.default.eachOfLimit(reply, 10, async_1.default.asyncify(function (key) { return __awaiter(_this, void 0, void 0, function () {
-                            return __generator(this, function (_a) {
-                                return [2, new Promise(function (res) {
-                                        client.del(key, function (err, reply) {
-                                            if (err) {
-                                                return res({ message: 'something went wrong' + err.message });
-                                            }
-                                            if (!reply) {
-                                                return res({
-                                                    message: "cache already cleared for key " + target,
-                                                    status: HTTP_NO_CONTENT
-                                                });
-                                            }
-                                            res({
-                                                message: "cache cleared for key " + target,
-                                                status: HTTP_OK
-                                            });
-                                        });
-                                    })];
-                            });
-                        }); }), function () { return resolve(hook); });
-                    });
+                    purgeGroup(client, targetGroup, prefix)
+                        .then(function () { return resolve({
+                        message: "cache cleared for group " + targetGroup,
+                        status: HTTP_OK,
+                    }); })
+                        .catch(function (err) { return resolve({
+                        message: err.message,
+                        status: HTTP_SERVER_ERROR,
+                    }); });
                 });
             }
             catch (err) {

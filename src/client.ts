@@ -3,6 +3,7 @@ import redis from 'redis';
 import chalk from 'chalk';
 
 const { DISABLE_REDIS_CACHE } = process.env;
+const defaultPrefix = 'frc_';
 
 export default (options: any = {}) => {
   const errorLogger = options.errorLogger || console.error;
@@ -18,6 +19,7 @@ export default (options: any = {}) => {
 
     try {
       const redisOptions = {
+        prefix: defaultPrefix,
         ...config,
         retry_strategy: () => {
           app.set('redisClient', undefined);

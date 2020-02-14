@@ -6,13 +6,19 @@ import async from 'async';
 
 const { DISABLE_REDIS_CACHE, ENABLE_REDIS_CACHE_LOGGER } = process.env;
 const HTTP_OK = 200;
-const HTTP_NO_CONTENT = 204;
 const HTTP_SERVER_ERROR = 500;
 const defaults = {
-  defaultExpiration: 3600 * 24 // seconds
+  defaultExpiration: 3600 * 24, // seconds
 };
 
-// TODO use md5 for path + query param
+function hashCode(s: string): string {
+  let h;
+  for (let i = 0; i < s.length; i++) {
+    h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+  }
+  return String(h);
+}
+
 function cacheKey(hook) {
   const q = hook.params.query || {};
   const p = hook.params.paginate === false ? 'disabled' : 'enabled';
@@ -26,7 +32,44 @@ function cacheKey(hook) {
     path += `?${qs.stringify(JSON.parse(JSON.stringify(q)), { encode: false })}`;
   }
 
-  return path;
+  // {prefix}{group}{key}
+  return `${hashCode(hook.path)}${hashCode(path)}`;
+}
+
+export async function purgeGroup(client, group: string, prefix: string = 'frc_') {
+  let cursor = '0';
+
+  function scan() {
+    return new Promise((resolve, reject) => {
+      client.scan(cursor, 'MATCH', `${prefix}${group}*`, 'COUNT', '1000', function (err, reply) {
+        if (err) reject(err);
+        if (!Array.isArray(!reply[1]) || !reply[1][0]) return resolve();
+
+        cursor = reply[0];
+        const keys = reply[1];
+        const batchKeys = keys.reduce((a, c) => {
+          if (Array.isArray(a[a.length - 1]) && a[a.length - 1].length < 2) {
+            a[a.length - 1].push(c);
+          } else if (!Array.isArray(a[a.length - 1]) || a[a.length - 1].length >= 2) {
+            a.push([c]);
+          }
+          return a;
+        }, []);
+
+        async.eachOfLimit(batchKeys, 10, (batch, idx, cb) => {
+          if (client.unlink) {
+            client.unlink(batch, cb);
+          } else {
+            client.del(batch, cb);
+          }
+        }, (err) => err ? reject(err) : resolve());
+      });
+
+      return scan();
+    });
+  }
+
+  return scan();
 }
 
 export default {
@@ -112,23 +155,23 @@ export default {
           const client = hook.app.get('redisClient');
           const options = { ...defaults, ...passedOptions };
           const duration = options.expiration || options.defaultExpiration;
-          const { cacheKey: path } = hook.params;
-          const group = hook.path ? `group-${hook.path}` : '';
+          const { cacheKey } = hook.params;
+          const group = hook.path ? hashCode(`group-${hook.path}`) : '';
 
           if (!client) {
             return resolve(hook);
           }
 
-          client.set(path, JSON.stringify({
+          client.set(cacheKey, JSON.stringify({
             cache: hook.result,
             expiresOn: moment().add(moment.duration(duration, 'seconds')),
             group,
           }));
-          client.expire(path, duration);
-          client.rpush(group, path);
+          client.expire(cacheKey, duration);
+          client.rpush(group, cacheKey);
 
           if (options.env !== 'test' && ENABLE_REDIS_CACHE_LOGGER === 'true') {
-            console.log(`${chalk.cyan('[redis]')} added ${chalk.green(path)} to the cache.`);
+            console.log(`${chalk.cyan('[redis]')} added ${chalk.green(cacheKey)} to the cache.`);
             console.log(`> Expires in ${moment.duration(duration, 'seconds').humanize()}.`);
           }
 
@@ -157,46 +200,25 @@ export default {
 
         return new Promise((resolve) => {
           const client = hook.app.get('redisClient');
-          const target = hook.path;
+          const { prefix } = hook.app.get('redis');
+          const targetGroup = hook.path;
 
           if (!client) {
             return {
               message: 'Redis unavailable',
-              status: HTTP_SERVER_ERROR
+              status: HTTP_SERVER_ERROR,
             };
           }
 
-          client.lrange(`group-${target}`, 0, -1, (err, reply) => {
-            if (err) {
-              return resolve(hook);
-            }
-
-            if (!reply || !Array.isArray(reply) || reply.length <= 0) {
-              return resolve(hook);
-            }
-
-            async.eachOfLimit(reply, 10, async.asyncify(async (key) => {
-              return new Promise((res) => {
-                client.del(key, (err, reply) => {
-                  if (err) {
-                    return res({ message: 'something went wrong' + err.message });
-                  }
-
-                  if (!reply) {
-                    return res({
-                      message: `cache already cleared for key ${target}`,
-                      status: HTTP_NO_CONTENT
-                    });
-                  }
-
-                  res({
-                    message: `cache cleared for key ${target}`,
-                    status: HTTP_OK
-                  });
-                });
-              });
-            }), () => resolve(hook));
-          });
+          purgeGroup(client, targetGroup, prefix)
+            .then(() => resolve({
+              message: `cache cleared for group ${targetGroup}`,
+              status: HTTP_OK,
+            }))
+            .catch((err) => resolve({
+              message: err.message,
+              status: HTTP_SERVER_ERROR,
+            }));
         });
       } catch (err) {
         console.error(err);

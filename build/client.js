@@ -17,6 +17,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var redis_1 = __importDefault(require("redis"));
 var chalk_1 = __importDefault(require("chalk"));
 var DISABLE_REDIS_CACHE = process.env.DISABLE_REDIS_CACHE;
+var defaultPrefix = 'frc_';
 exports.default = (function (options) {
     if (options === void 0) { options = {}; }
     var errorLogger = options.errorLogger || console.error;
@@ -28,7 +29,7 @@ exports.default = (function (options) {
         var app = this;
         var config = app.get('redis') || {};
         try {
-            var redisOptions = __assign({}, config, { retry_strategy: function () {
+            var redisOptions = __assign({ prefix: defaultPrefix }, config, { retry_strategy: function () {
                     app.set('redisClient', undefined);
                     console.log(chalk_1.default.yellow('[redis]') + " not connected");
                     return retryInterval;

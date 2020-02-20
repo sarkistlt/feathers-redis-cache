@@ -235,14 +235,11 @@ exports.default = {
                         };
                     }
                     purgeGroup(client, targetGroup, prefix)
-                        .then(function () { return resolve({
-                        message: "cache cleared for group " + targetGroup,
-                        status: HTTP_OK,
-                    }); })
-                        .catch(function (err) { return resolve({
+                        .catch(function (err) { return console.error({
                         message: err.message,
                         status: HTTP_SERVER_ERROR,
                     }); });
+                    resolve(hook);
                 });
             }
             catch (err) {

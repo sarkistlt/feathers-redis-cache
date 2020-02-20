@@ -212,14 +212,13 @@ export default {
           }
 
           purgeGroup(client, targetGroup, prefix)
-            .then(() => resolve({
-              message: `cache cleared for group ${targetGroup}`,
-              status: HTTP_OK,
-            }))
-            .catch((err) => resolve({
+            .catch((err) => console.error({
               message: err.message,
               status: HTTP_SERVER_ERROR,
             }));
+
+          // do not wait for purge to resolve
+          resolve(hook);
         });
       } catch (err) {
         console.error(err);

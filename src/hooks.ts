@@ -11,7 +11,7 @@ const defaults = {
   defaultExpiration: 3600 * 24, // seconds
 };
 
-function hashCode(s: string): string {
+export function hashCode(s: string): string {
   let h;
   for (let i = 0; i < s.length; i++) {
     h = Math.imul(31, h) + s.charCodeAt(i) | 0;
@@ -202,7 +202,7 @@ export default {
         return new Promise((resolve) => {
           const client = hook.app.get('redisClient');
           const { prefix } = hook.app.get('redis');
-          const targetGroup = hook.path;
+          const targetGroup = hook.path ? hashCode(`group-${hook.path}`) : '';
 
           if (!client) {
             return {

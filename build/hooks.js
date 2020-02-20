@@ -66,6 +66,7 @@ function hashCode(s) {
     }
     return String(h);
 }
+exports.hashCode = hashCode;
 function cacheKey(hook) {
     var q = hook.params.query || {};
     var p = hook.params.paginate === false ? 'disabled' : 'enabled';
@@ -226,7 +227,7 @@ exports.default = {
                 return new Promise(function (resolve) {
                     var client = hook.app.get('redisClient');
                     var prefix = hook.app.get('redis').prefix;
-                    var targetGroup = hook.path;
+                    var targetGroup = hook.path ? hashCode("group-" + hook.path) : '';
                     if (!client) {
                         return {
                             message: 'Redis unavailable',

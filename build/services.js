@@ -104,18 +104,25 @@ var serviceClearGroup = {
     },
     find: function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var client, prefix, target;
+            var client, prefix, target, targetGroup;
             return __generator(this, function (_a) {
                 client = this.app.get('redisClient');
                 prefix = this.app.get('redis').prefix;
                 target = params.query.target;
+                targetGroup = target ? hooks_1.hashCode("group-" + target) : '';
                 if (!client) {
                     return [2, {
                             message: 'Redis unavailable',
                             status: HTTP_SERVER_ERROR
                         }];
                 }
-                return [2, hooks_1.purgeGroup(client, target, prefix)
+                if (!targetGroup) {
+                    return [2, {
+                            message: 'Target is required',
+                            status: HTTP_SERVER_ERROR
+                        }];
+                }
+                return [2, hooks_1.purgeGroup(client, targetGroup, prefix)
                         .then(function () { return ({
                         message: "cache cleared for group " + target,
                         status: HTTP_OK,

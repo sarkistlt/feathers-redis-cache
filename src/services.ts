@@ -1,4 +1,4 @@
-import { purgeGroup } from './hooks';
+import { purgeGroup, hashCode } from './hooks';
 
 const { DISABLE_REDIS_CACHE } = process.env;
 const HTTP_OK = 200;
@@ -73,6 +73,7 @@ const serviceClearGroup = {
     const client = this.app.get('redisClient');
     const { prefix } = this.app.get('redis');
     const { target } = params.query;
+    const targetGroup = target ? hashCode(`group-${target}`) : '';
 
     if (!client) {
       return {
@@ -81,7 +82,14 @@ const serviceClearGroup = {
       };
     }
 
-    return purgeGroup(client, target, prefix)
+    if (!targetGroup) {
+      return {
+        message: 'Target is required',
+        status: HTTP_SERVER_ERROR
+      };
+    }
+
+    return purgeGroup(client, targetGroup, prefix)
       .then(() => ({
         message: `cache cleared for group ${target}`,
         status: HTTP_OK,

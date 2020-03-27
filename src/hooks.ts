@@ -74,7 +74,7 @@ export async function purgeGroup(client, group: string, prefix: string = 'frc_')
 }
 
 export default {
-  before(passedOptions) {
+  before(passedOptions: any = {}) {
     if (DISABLE_REDIS_CACHE) {
       return hook => hook;
     }
@@ -93,9 +93,12 @@ export default {
             return resolve(hook);
           }
 
+          const group = typeof options.cacheKey === 'function' ?
+            hashCode(`group-${options.cacheGroupKey(hook)}`) :
+            hashCode(`group-${hook.path || 'general'}`);
           const path = typeof options.cacheKey === 'function' ?
-            options.cacheKey(hook) :
-            cacheKey(hook);
+            `${group}${options.cacheKey(hook)}` :
+            `${group}${cacheKey(hook)}`;
 
           hook.params.cacheKey = path;
 
@@ -133,7 +136,7 @@ export default {
       }
     };
   },
-  after(passedOptions) {
+  after(passedOptions: any = {}) {
     if (DISABLE_REDIS_CACHE) {
       return hook => hook;
     }
@@ -157,7 +160,6 @@ export default {
           const options = { ...defaults, ...passedOptions };
           const duration = options.expiration || options.defaultExpiration;
           const { cacheKey } = hook.params;
-          const group = hook.path ? hashCode(`group-${hook.path}`) : '';
 
           if (!client) {
             return resolve(hook);
@@ -166,10 +168,8 @@ export default {
           client.set(cacheKey, JSON.stringify({
             cache: hook.result,
             expiresOn: moment().add(moment.duration(duration, 'seconds')),
-            group,
           }));
           client.expire(cacheKey, duration);
-          client.rpush(group, cacheKey);
 
           if (options.env !== 'test' && ENABLE_REDIS_CACHE_LOGGER === 'true') {
             console.log(`${chalk.cyan('[redis]')} added ${chalk.green(cacheKey)} to the cache.`);
@@ -184,25 +184,20 @@ export default {
       }
     };
   },
-  purge() {
+  purge(passedOptions = {}) {
     if (DISABLE_REDIS_CACHE) {
       return hook => hook;
     }
 
     return function (hook) {
       try {
-        if (
-          hook
-          && hook.params
-          && hook.params.$skipCacheHook
-        ) {
-          return Promise.resolve(hook);
-        }
-
         return new Promise((resolve) => {
           const client = hook.app.get('redisClient');
+          const options: any = { ...defaults, ...passedOptions };
           const { prefix } = hook.app.get('redis');
-          const targetGroup = hook.path ? hashCode(`group-${hook.path}`) : '';
+          const group = typeof options.cacheKey === 'function' ?
+            hashCode(`group-${options.cacheGroupKey(hook)}`) :
+            hashCode(`group-${hook.path || 'general'}`);
 
           if (!client) {
             return {
@@ -211,7 +206,7 @@ export default {
             };
           }
 
-          purgeGroup(client, targetGroup, prefix)
+          purgeGroup(client, group, prefix)
             .catch((err) => console.error({
               message: err.message,
               status: HTTP_SERVER_ERROR,

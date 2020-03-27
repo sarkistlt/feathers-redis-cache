@@ -78,7 +78,10 @@ More details and example use bellow
 #### options properties (all props are optional)
 
 ##### cacheKey(context: `feathers-context`): `string`
-In case if you want to use custom function to modify key name, you need to pass the same function in before and after hooks.
+In case if you want to use custom function to modify key name. You need to pass the same function in before and after hooks.
+
+##### cacheGroupKey(context: `feathers-context`): `string`
+If you want to use custom function to modify group key name. You need to pass the same function in before and after hooks.
 
 ##### expiration: `number`
 Time in seconds when to expire the key, this option need to be passed in after hook, if you won't pass it, default value of 1 day will be used.

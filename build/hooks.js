@@ -124,6 +124,7 @@ function purgeGroup(client, group, prefix) {
 exports.purgeGroup = purgeGroup;
 exports.default = {
     before: function (passedOptions) {
+        if (passedOptions === void 0) { passedOptions = {}; }
         if (DISABLE_REDIS_CACHE) {
             return function (hook) { return hook; };
         }
@@ -138,9 +139,12 @@ exports.default = {
                     if (!client) {
                         return resolve(hook);
                     }
+                    var group = typeof options.cacheKey === 'function' ?
+                        hashCode("group-" + options.cacheGroupKey(hook)) :
+                        hashCode("group-" + (hook.path || 'general'));
                     var path = typeof options.cacheKey === 'function' ?
-                        options.cacheKey(hook) :
-                        cacheKey(hook);
+                        "" + group + options.cacheKey(hook) :
+                        "" + group + cacheKey(hook);
                     hook.params.cacheKey = path;
                     client.get(path, function (err, reply) {
                         if (err) {
@@ -171,6 +175,7 @@ exports.default = {
         };
     },
     after: function (passedOptions) {
+        if (passedOptions === void 0) { passedOptions = {}; }
         if (DISABLE_REDIS_CACHE) {
             return function (hook) { return hook; };
         }
@@ -189,17 +194,14 @@ exports.default = {
                     var options = __assign({}, defaults, passedOptions);
                     var duration = options.expiration || options.defaultExpiration;
                     var cacheKey = hook.params.cacheKey;
-                    var group = hook.path ? hashCode("group-" + hook.path) : '';
                     if (!client) {
                         return resolve(hook);
                     }
                     client.set(cacheKey, JSON.stringify({
                         cache: hook.result,
                         expiresOn: moment_1.default().add(moment_1.default.duration(duration, 'seconds')),
-                        group: group,
                     }));
                     client.expire(cacheKey, duration);
-                    client.rpush(group, cacheKey);
                     if (options.env !== 'test' && ENABLE_REDIS_CACHE_LOGGER === 'true') {
                         console.log(chalk_1.default.cyan('[redis]') + " added " + chalk_1.default.green(cacheKey) + " to the cache.");
                         console.log("> Expires in " + moment_1.default.duration(duration, 'seconds').humanize() + ".");
@@ -213,28 +215,27 @@ exports.default = {
             }
         };
     },
-    purge: function () {
+    purge: function (passedOptions) {
+        if (passedOptions === void 0) { passedOptions = {}; }
         if (DISABLE_REDIS_CACHE) {
             return function (hook) { return hook; };
         }
         return function (hook) {
             try {
-                if (hook
-                    && hook.params
-                    && hook.params.$skipCacheHook) {
-                    return Promise.resolve(hook);
-                }
                 return new Promise(function (resolve) {
                     var client = hook.app.get('redisClient');
+                    var options = __assign({}, defaults, passedOptions);
                     var prefix = hook.app.get('redis').prefix;
-                    var targetGroup = hook.path ? hashCode("group-" + hook.path) : '';
+                    var group = typeof options.cacheKey === 'function' ?
+                        hashCode("group-" + options.cacheGroupKey(hook)) :
+                        hashCode("group-" + (hook.path || 'general'));
                     if (!client) {
                         return {
                             message: 'Redis unavailable',
                             status: HTTP_SERVER_ERROR,
                         };
                     }
-                    purgeGroup(client, targetGroup, prefix)
+                    purgeGroup(client, group, prefix)
                         .catch(function (err) { return console.error({
                         message: err.message,
                         status: HTTP_SERVER_ERROR,

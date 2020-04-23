@@ -195,7 +195,7 @@ export default {
           const client = hook.app.get('redisClient');
           const options: any = { ...defaults, ...passedOptions };
           const { prefix } = hook.app.get('redis');
-          const group = typeof options.cacheKey === 'function' ?
+          const group = typeof options.cacheGroupKey === 'function' ?
             hashCode(`group-${options.cacheGroupKey(hook)}`) :
             hashCode(`group-${hook.path || 'general'}`);
 

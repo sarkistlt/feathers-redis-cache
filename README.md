@@ -137,8 +137,8 @@ const redisCache = require('feathers-redis-cache');
 module.exports = {
   before: {
     all: [],
-    find: [redisCache.before()],
-    get: [redisCache.before()],
+    find: [redisCache.hooks.before()],
+    get: [redisCache.hooks.before()],
     create: [],
     update: [],
     patch: [],
@@ -147,12 +147,12 @@ module.exports = {
 
   after: {
     all: [],
-    find: [redisCache.after({ expiration: 3600 * 24 * 7 })],
-    get: [redisCache.after({ expiration: 3600 * 24 * 7 })],
-    create: [redisCache.purge()],
-    update: [redisCache.purge()],
-    patch: [redisCache.purge()],
-    remove: [redisCache.purge()]
+    find: [redisCache.hooks.after({ expiration: 3600 * 24 * 7 })],
+    get: [redisCache.hooks.after({ expiration: 3600 * 24 * 7 })],
+    create: [redisCache.hooks.purge()],
+    update: [redisCache.hooks.purge()],
+    patch: [redisCache.hooks.purge()],
+    remove: [redisCache.hooks.purge()]
   },
 
   error: {

@@ -68,6 +68,13 @@ To configure the redis connection the feathers configuration system can be used.
 ```
 * if no config is provided, default config from the [redis module](https://github.com/NodeRedis/node_redis) is used
 
+#### Environment variables
+
+| key                         | default     | values   | description                                                       |
+| --------------------------- | ----------- | -------- | ----------------------------------------------------------------- |
+| `ENABLE_REDIS_CACHE_LOGGER` | `undefined` | `'true'` | Set this to true to enable logging for the before and after hooks |
+| `DISABLE_REDIS_CACHE`       | `undefined` | `'true'` | Disables the cache                                                |
+
 ## Available hooks
 More details and example use bellow
 

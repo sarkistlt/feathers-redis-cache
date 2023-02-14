@@ -75,7 +75,7 @@ export async function purgeGroup(client, group: string, prefix: string = 'frc_')
 
 export default {
   before(passedOptions: any = {}) {
-    if (DISABLE_REDIS_CACHE) {
+    if (DISABLE_REDIS_CACHE === 'false') {
       return hook => hook;
     }
 
@@ -137,7 +137,7 @@ export default {
     };
   },
   after(passedOptions: any = {}) {
-    if (DISABLE_REDIS_CACHE) {
+    if (DISABLE_REDIS_CACHE === 'false') {
       return hook => hook;
     }
 
@@ -185,7 +185,7 @@ export default {
     };
   },
   purge(passedOptions = {}) {
-    if (DISABLE_REDIS_CACHE) {
+    if (DISABLE_REDIS_CACHE === 'false') {
       return hook => hook;
     }
 

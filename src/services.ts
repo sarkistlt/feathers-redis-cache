@@ -159,7 +159,7 @@ export default (options: any = {}) => {
   return function () {
     const app = this;
 
-    if (!DISABLE_REDIS_CACHE) {
+    if (DISABLE_REDIS_CACHE !== 'false') {
       app.use(`${pathPrefix}/clear/single`, serviceClearSingle);
       app.use(`${pathPrefix}/clear/group`, serviceClearGroup);
       app.use(`${pathPrefix}/clear/all`, serviceClearAll);

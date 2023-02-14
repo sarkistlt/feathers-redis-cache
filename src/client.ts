@@ -9,7 +9,7 @@ export default (options: any = {}) => {
   const errorLogger = options.errorLogger || console.error;
   const retryInterval = options.retryInterval || 5000;
 
-  if (DISABLE_REDIS_CACHE) {
+  if (DISABLE_REDIS_CACHE === 'false') {
     return () => {};
   }
 

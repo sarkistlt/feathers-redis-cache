@@ -125,7 +125,7 @@ exports.purgeGroup = purgeGroup;
 exports.default = {
     before: function (passedOptions) {
         if (passedOptions === void 0) { passedOptions = {}; }
-        if (DISABLE_REDIS_CACHE) {
+        if (DISABLE_REDIS_CACHE === 'false') {
             return function (hook) { return hook; };
         }
         return function (hook) {
@@ -139,7 +139,7 @@ exports.default = {
                     if (!client) {
                         return resolve(hook);
                     }
-                    var group = typeof options.cacheKey === 'function' ?
+                    var group = typeof options.cacheGroupKey === 'function' ?
                         hashCode("group-" + options.cacheGroupKey(hook)) :
                         hashCode("group-" + (hook.path || 'general'));
                     var path = typeof options.cacheKey === 'function' ?
@@ -176,7 +176,7 @@ exports.default = {
     },
     after: function (passedOptions) {
         if (passedOptions === void 0) { passedOptions = {}; }
-        if (DISABLE_REDIS_CACHE) {
+        if (DISABLE_REDIS_CACHE === 'false') {
             return function (hook) { return hook; };
         }
         return function (hook) {
@@ -217,7 +217,7 @@ exports.default = {
     },
     purge: function (passedOptions) {
         if (passedOptions === void 0) { passedOptions = {}; }
-        if (DISABLE_REDIS_CACHE) {
+        if (DISABLE_REDIS_CACHE === 'false') {
             return function (hook) { return hook; };
         }
         return function (hook) {
@@ -226,7 +226,7 @@ exports.default = {
                     var client = hook.app.get('redisClient');
                     var options = __assign({}, defaults, passedOptions);
                     var prefix = hook.app.get('redis').prefix;
-                    var group = typeof options.cacheKey === 'function' ?
+                    var group = typeof options.cacheGroupKey === 'function' ?
                         hashCode("group-" + options.cacheGroupKey(hook)) :
                         hashCode("group-" + (hook.path || 'general'));
                     if (!client) {

@@ -125,7 +125,7 @@ exports.purgeGroup = purgeGroup;
 exports.default = {
     before: function (passedOptions) {
         if (passedOptions === void 0) { passedOptions = {}; }
-        if (DISABLE_REDIS_CACHE === 'false') {
+        if (DISABLE_REDIS_CACHE === 'true') {
             return function (hook) { return hook; };
         }
         return function (hook) {
@@ -176,7 +176,7 @@ exports.default = {
     },
     after: function (passedOptions) {
         if (passedOptions === void 0) { passedOptions = {}; }
-        if (DISABLE_REDIS_CACHE === 'false') {
+        if (DISABLE_REDIS_CACHE === 'true') {
             return function (hook) { return hook; };
         }
         return function (hook) {
@@ -217,7 +217,7 @@ exports.default = {
     },
     purge: function (passedOptions) {
         if (passedOptions === void 0) { passedOptions = {}; }
-        if (DISABLE_REDIS_CACHE === 'false') {
+        if (DISABLE_REDIS_CACHE === 'true') {
             return function (hook) { return hook; };
         }
         return function (hook) {

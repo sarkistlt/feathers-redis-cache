@@ -22,7 +22,7 @@ exports.default = (function (options) {
     if (options === void 0) { options = {}; }
     var errorLogger = options.errorLogger || console.error;
     var retryInterval = options.retryInterval || 5000;
-    if (DISABLE_REDIS_CACHE === 'false') {
+    if (DISABLE_REDIS_CACHE === 'true') {
         return function () { };
     }
     return function client() {

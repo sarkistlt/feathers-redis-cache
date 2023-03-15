@@ -198,7 +198,7 @@ exports.default = (function (options) {
     var pathPrefix = options.pathPrefix || '/cache';
     return function () {
         var app = this;
-        if (!DISABLE_REDIS_CACHE) {
+        if (DISABLE_REDIS_CACHE !== 'true') {
             app.use(pathPrefix + "/clear/single", serviceClearSingle);
             app.use(pathPrefix + "/clear/group", serviceClearGroup);
             app.use(pathPrefix + "/clear/all", serviceClearAll);

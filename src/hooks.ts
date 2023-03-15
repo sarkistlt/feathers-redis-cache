@@ -41,7 +41,7 @@ export async function purgeGroup(client, group: string, prefix: string = 'frc_')
     let cursor = '0';
 
     function scan() {
-        client.scan(cursor, 'MATCH', `${prefix}${group}*`, 'COUNT', '1000', function (err, reply) {
+        client.scan(cursor, 'MATCH', `${prefix}${group}*`, 'COUNT', '10000', function (err, reply) {
           if (err) return reject(err);
           if (!Array.isArray(reply[1]) || !reply[1][0]) return resolve();
 

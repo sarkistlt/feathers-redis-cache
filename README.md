@@ -68,6 +68,23 @@ To configure the redis connection the feathers configuration system can be used.
 ```
 * if no config is provided, default config from the [redis module](https://github.com/NodeRedis/node_redis) is used
 
+
+#### Enabling TLS
+
+Some redis configurations use TLS connections, for example MemoryDB in AWS. If this is a requirement, you can enable TLS on the redis client by using the following configuration. See [node-redis](https://github.com/redis/node-redis/blob/HEAD/docs/client-configuration.md#create-a-ssl-client) for details. 
+
+```js
+{
+// ...
+    redis: {
+        // ...
+        socket: {
+            tls: true
+        }
+    }
+}
+```
+
 #### Environment variables
 
 | key                         | default     | values   | description                                                       |
